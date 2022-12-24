@@ -32,9 +32,22 @@ def sov_cred(country):
 
     # Create an empty DataFrame with the dates as the index to fill it in later
     df = pd.DataFrame(index=dates)
-    df[source] = ""
-    df[source+'_num'] = ""
+    # df[source] = ""
+    # df[source+'_num'] = ""
 
+
+
+#***Comment these out for the code to work with just one provider
+    #Assigning empty dataframe to fill in later
+    df['snp'] = ""
+    df['mood'] = ""
+    df['fit'] = ""
+
+    #This is for converting the sting ratings into numeric
+    df['snp_num'] = ""
+    df['mood_num'] = ""
+    df['fit_num'] = ""
+#*****End
 
     result_table = soup.find_all("div", class_="w3-responsive")[2:3]
 
@@ -139,12 +152,21 @@ def sov_cred(country):
         while count != len(df):
 
             #Changing the format of the date
-            date_format_2=datetime.fromtimestamp(int(str(df.index[len(df)-count].value)[0:10])).replace(hour=0, minute=00)
+            date_format_2= df.index[len(df)-count]
     
             #Note that the date stars of latest so we are filling the df from the last data point
             if date == date_format_2:
-                df[source][len(df)-count] = snp
-                df[source+'_num'][len(df)-count] = dict_rate_convert[source][snp]
+                # df[source][len(df)-count] = snp
+                # df[source+'_num'][len(df)-count] = dict_rate_convert[source][snp]
+
+                df['snp'][len(df)-count] = snp
+                df['mood'][len(df)-count] = mood
+                df['fit'][len(df)-count] = fitch
+
+                df['snp_num'][len(df)-count] = dict_rate_convert['snp'][snp]
+                df['mood_num'][len(df)-count] = dict_rate_convert['mood'][mood]
+                df['fit_num'][len(df)-count] = dict_rate_convert['fit'][fitch]
+
 
             count+=1    
 
@@ -154,7 +176,11 @@ def sov_cred(country):
                 df[col][i] = df[col][i-1]
 
 
-    return df[source+'_num']
+    
+    df["avg_cred"] = (df['snp_num'] +df['mood_num']+df['fit_num'])/3
+
+
+    return df["avg_cred"] #df[source+'_num']
 
 #to convert the dates
 def date_convert(date_input):
